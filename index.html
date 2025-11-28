@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Torre de Palitos 3D (Efeitos Atualizados)</title>
+    <link rel="icon" href="Imagens/favcon.png" type="image/png">
+    <link rel="shortcut icon" href="Imagens/favcon.png">
     
     <!-- Estilos Básicos -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -77,6 +79,17 @@
         .spinner { border: 4px solid #333; border-top: 4px solid #fbbf24; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #error-log { color: #ff4444; background: rgba(50,0,0,0.9); padding: 20px; border-radius: 8px; max-width: 90%; font-family: monospace; display: none; margin-top: 20px; }
+        
+        /* Controles de Áudio */
+        #audio-control { 
+            position: fixed; bottom: 20px; right: 20px; z-index: 100; 
+            background: rgba(20,20,20,0.9); border: 1px solid #fbbf24; border-radius: 50%; 
+            width: 50px; height: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #fbbf24; font-size: 24px; transition: all 0.3s;
+            backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+        }
+        #audio-control:hover { transform: scale(1.1); box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); }
+        #audio-control:active { transform: scale(0.95); }
     </style>
 
     <!-- Bibliotecas -->
@@ -85,6 +98,12 @@
     <script src="https://unpkg.com/@jaames/iro@5.5.2/dist/iro.min.js"></script>
 </head>
 <body>
+    <!-- Áudio em loop -->
+    <audio id="background-audio" loop>
+        <source src="Audio/Audio.mp3" type="audio/mpeg">
+    </audio>
+    <div id="audio-control" onclick="toggleAudio()" title="Ativar/Desativar Áudio">🔊</div>
+    
     <div id="loader">
         <div class="spinner"></div>
         <div id="loading-text">A carregar motor 3D...</div>
@@ -137,6 +156,31 @@
     </div>
 
     <script>
+        let audioPlaying = false;
+        const audioElement = document.getElementById('background-audio');
+        const audioControl = document.getElementById('audio-control');
+        
+        function toggleAudio() {
+            if (audioPlaying) {
+                audioElement.pause();
+                audioControl.textContent = '🔇';
+                audioPlaying = false;
+            } else {
+                audioElement.play().catch(err => console.log('Áudio não pode ser reproduzido automaticamente:', err));
+                audioControl.textContent = '🔊';
+                audioPlaying = true;
+            }
+        }
+        
+        // Tentar reproduzir áudio automaticamente (alguns navegadores podem bloquear)
+        window.addEventListener('click', () => {
+            if (!audioPlaying && audioElement.paused) {
+                audioElement.play().catch(err => console.log('Áudio não pode ser reproduzido:', err));
+                audioControl.textContent = '🔊';
+                audioPlaying = true;
+            }
+        }, { once: true });
+        
         function toggleUI() { document.getElementById('ui-layer').classList.toggle('hidden-ui'); }
         function showError(msg) {
             const loader = document.getElementById('loader'); const errorLog = document.getElementById('error-log'); const spinner = document.querySelector('.spinner');
